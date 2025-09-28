@@ -68,14 +68,24 @@ router.put("/:id", tokenConfig, async (req, res) => {
       runValidators: true,
     });
     if (!expense) return res.status(404).json({ message: "Expense not found" });
-    await new expense.save();
+
     res.status(200).json({ message: "Expense updated", expense });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
-
+router.get("/summary", tokenConfig, async (req, res) => {
+  try {
+    const summary = await Expense.aggregate([
+      { $match: { user: req.user.id } },
+      { $group: { _id: "$category", total: { $sum: "$amount" } } },
+      { $project: { category: $_id, total: 1, _id: 0 } },
+    ]);
+    res.status(200).json({ summary });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 export default router;

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import "@dotenvx/dotenvx";
 
-const tokenConfig = (req, res, next) => {
+const TokenConfig = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (authHeader && authHeader.startsWith("Bearer")) {
     const token = authHeader.split(" ")[1];
@@ -17,4 +17,4 @@ const tokenConfig = (req, res, next) => {
   res.status(400).json({ message: "No token provided" });
 };
 
-export default tokenConfig;
+export default TokenConfig;

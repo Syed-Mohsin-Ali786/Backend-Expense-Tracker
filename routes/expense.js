@@ -1,11 +1,13 @@
 import express from "express";
-import tokenConfig from "../middleware/tokenConfig";
-import Expense from "../models/Expense";
+import TokenConfig from '../middleware/TokenConfig.js'
+import Expense from "../models/Expense.js";
+
 
 const router = express.Router();
 
-router.post("/add", tokenConfig, async (req, res) => {
+router.post("/add", TokenConfig, async (req, res) => {
   const { amount, category, date, description } = req.body;
+  
   try {
     const expense = new Expense({
       user: req.user.id,
@@ -22,7 +24,7 @@ router.post("/add", tokenConfig, async (req, res) => {
   }
 });
 
-router.get("/list", tokenConfig, async (req, res) => {
+router.get("/list", TokenConfig, async (req, res) => {
   try {
     const userId = req.user.id;
     const expense = await Expense.find({ user: userId });
@@ -37,7 +39,7 @@ router.get("/list", tokenConfig, async (req, res) => {
   }
 });
 
-router.delete("/:id", tokenConfig, async (req, res) => {
+router.delete("/:id", TokenConfig, async (req, res) => {
   try {
     const expenseId = req.params.id;
     const expense = await Expense.findOne({
@@ -52,7 +54,7 @@ router.delete("/:id", tokenConfig, async (req, res) => {
   }
 });
 
-router.put("/:id", tokenConfig, async (req, res) => {
+router.put("/:id", TokenConfig, async (req, res) => {
   try {
     const { amount, category, date, description } = req.body;
     const filter = { _id: req.params.id, user: req.user.id };
@@ -75,12 +77,13 @@ router.put("/:id", tokenConfig, async (req, res) => {
   }
 });
 
-router.get("/summary", tokenConfig, async (req, res) => {
+router.get("/summary", TokenConfig, async (req, res) => {
   try {
     const summary = await Expense.aggregate([
       { $match: { user: req.user.id } },
       { $group: { _id: "$category", total: { $sum: "$amount" } } },
-      { $project: { category: $_id, total: 1, _id: 0 } },
+      { $project: { category: "$_id", total: 1, _id: 0 } }
+
     ]);
     res.status(200).json({ summary });
   } catch (error) {

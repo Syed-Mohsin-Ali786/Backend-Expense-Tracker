@@ -4,7 +4,7 @@ import helmet from "helmet";
 import "@dotenvx/dotenvx";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js"
-
+import expenseRoutes from "./routes/expense.js"
 
 const app = express();
 app.use(express.json())
@@ -20,7 +20,7 @@ await mongoose
   .catch((err) => console.log(err));
 
 app.use("/api/auth",authRoutes)
-app.use("/api/expenses",expenseRoutes)
+app.use("/api/expense",expenseRoutes)
 
 
 app.listen(PORT, () => {

@@ -1,13 +1,13 @@
 import express from "express";
-import TokenConfig from '../middleware/TokenConfig.js'
+import TokenConfig from "../middleware/TokenConfig.js";
 import Expense from "../models/Expense.js";
-
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 router.post("/add", TokenConfig, async (req, res) => {
   const { amount, category, date, description } = req.body;
-  
+
   try {
     const expense = new Expense({
       user: req.user.id,
@@ -42,14 +42,20 @@ router.get("/list", TokenConfig, async (req, res) => {
 router.delete("/:id", TokenConfig, async (req, res) => {
   try {
     const expenseId = req.params.id;
-    const expense = await Expense.findOne({
-      _id: expenseId,
-      user: req.user.id,
-    });
+    const userId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(expenseId)) {
+      return res.status(400).json({ message: "Invalid expense ID" });
+    }
+
+    const expense = await Expense.findOne({ _id: expenseId, user: userId });
     if (!expense) return res.status(404).json({ message: "Expense not found" });
-    await ArchivedExpense.create(expense.toObject());
+
     await expense.deleteOne();
+
+    res.status(200).json({ success: true, id: expenseId });
   } catch (error) {
+    console.error("Delete error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 });
@@ -79,11 +85,11 @@ router.put("/:id", TokenConfig, async (req, res) => {
 
 router.get("/summary", TokenConfig, async (req, res) => {
   try {
+    const userId = new mongoose.Types.ObjectId(req.user.id);
     const summary = await Expense.aggregate([
-      { $match: { user: req.user.id } },
+      { $match: { user: userId } },
       { $group: { _id: "$category", total: { $sum: "$amount" } } },
-      { $project: { category: "$_id", total: 1, _id: 0 } }
-
+      { $project: { category: "$_id", total: 1, _id: 0 } },
     ]);
     res.status(200).json({ summary });
   } catch (error) {

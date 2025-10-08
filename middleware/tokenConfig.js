@@ -1,5 +1,7 @@
-import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken"; 
+
 import "@dotenvx/dotenvx";
+
 
 const TokenConfig = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -10,11 +12,18 @@ const TokenConfig = (req, res, next) => {
       req.user = decoded;
       return next();
     } catch (err) {
+       if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expired, please log in again" });
+    }
       return res.status(401).json({ message: "Token Invalid" });
     }
   }
-
   res.status(400).json({ message: "No token provided" });
 };
+
+
+
+  
+
 
 export default TokenConfig;

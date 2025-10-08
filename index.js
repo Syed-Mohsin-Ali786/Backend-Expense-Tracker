@@ -8,7 +8,10 @@ import expenseRoutes from "./routes/expense.js"
 
 const app = express();
 app.use(express.json())
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", 
+               
+}));
 app.use(helmet());
 
 const PORT = process.env.PORT || "3000";
@@ -20,6 +23,7 @@ await mongoose
   .catch((err) => console.log(err));
 
 app.use("/api/auth",authRoutes)
+
 app.use("/api/expense",expenseRoutes)
 
 
